@@ -1,4 +1,4 @@
-# Android hosts file editing #
+# Android emulator hosts file editing #
 
 ```bash
 ./android-hosts
