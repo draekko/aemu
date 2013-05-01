@@ -14,7 +14,7 @@ else
 	editor=$VISUAL
 fi
 
-# Declare an associate array of hosts.
+# Declare an associative array of hosts.
 declare -A hosts
 
 # Read host file entries into the array using process substitution.
