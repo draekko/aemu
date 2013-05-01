@@ -12,6 +12,14 @@ You'll be prompted to select a virtual device by name. After that, your `$VISUAL
 
 Save the file and exit to push the changes.
 
+## Options ##
+
+All options will be passed to `emulator`. This is useful if for example you want to enable HTTP proxying in the emulator.
+
+```bash
+./android-hosts -http-proxy http://127.0.0.1:8888
+```
+
 ## License ##
 
 Copyright © 2013 Matthew Caruana Galizia, licensed under an [MIT license](http://mattcg.mit-license.org/).
