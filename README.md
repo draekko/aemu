@@ -4,7 +4,7 @@ Syncs your `/etc/hosts` with your Android virtual devices.
 
 ## Why is this needed? ##
 
-Unlike the iOS simulator, the Android emulator ignore's your system's hosts file.
+Unlike the iOS simulator, the Android emulator ignores your system's hosts file.
 
 ## Install ##
 
