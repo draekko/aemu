@@ -1,4 +1,4 @@
-#!/usr/local/bin/bash
+#!/usr/bin/env bash
 
 # Sync /etc/hosts to the Android emulator.
 # Copyright (c) 2013, Matthew Caruana Galizia <m@m.cg>
