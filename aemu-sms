@@ -4,6 +4,9 @@
 # Copyright (c) 2013, Matthew Caruana Galizia <m@m.cg>
 # License: MIT <http://mattcg.mit-license.org/>
 
+DEFAULTNUMBER=5555555555
+DEFAULTTEXT="Hi! - aemu"
+
 usage() {
 cat << EOF
 Send an SMS to the Android emulator.
@@ -14,7 +17,7 @@ aemu-sms [options]
 
 OPTIONS:
 	-h	Show this message.
-	-n	Phone number.
+	-n	Phone number. Defaults to $DEFAULTNUMBER.
 	-m	Message. Will copy from the host clipboard if unspecified.
 EOF
 }
@@ -37,12 +40,12 @@ done
 if [ -z "$TEXT" ]; then
 	TEXT=`./pbpaste`
 	if [ -z "$TEXT" ]; then
-		TEXT="Hi! - aemu"
+		TEXT=$DEFAULTTEXT
 	fi
 fi
 
 if [ -z "$NUMBER" ]; then
-	NUMBER=5555555555
+	NUMBER=$DEFAULTNUMBER
 fi
  
 ( echo sms send $NUMBER $TEXT; sleep 1; ) | telnet localhost 5554 &> /dev/null
