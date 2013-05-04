@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+
+# Send an SMS to the Android emulator.
+# Copyright (c) 2013, Matthew Caruana Galizia <m@m.cg>
+# License: MIT <http://mattcg.mit-license.org/>
+
+usage() {
+cat << EOF
+Send an SMS to the Android emulator.
+
+USAGE:
+
+aemu-sms <message> [options]
+
+OPTIONS:
+	-h	Show this message.
+	-n	Phone number.
+	-m	Message.
+EOF
+}
+
+while getopts "hn:m:" OPTION
+do
+	case $OPTION in
+		h)
+			usage
+			exit 1
+			;;
+		n)
+			NUMBER=$OPTARG
+			;;
+		m)
+			TEXT=$OPTARG
+	esac
+done
+ 
+if [ -z "$TEXT" ]; then
+	TEXT=`./pbpaste`
+	if [ -z "$TEXT" ]; then
+		TEXT="Hi! - aemu"
+	fi
+fi
+
+if [ -z "$NUMBER" ]; then
+	NUMBER=5555555555
+fi
+ 
+( echo sms send $NUMBER $TEXT; sleep 1; ) | telnet localhost 5554 &> /dev/null
