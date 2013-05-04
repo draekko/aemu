@@ -10,12 +10,12 @@ Send an SMS to the Android emulator.
 
 USAGE:
 
-aemu-sms <message> [options]
+aemu-sms [options]
 
 OPTIONS:
 	-h	Show this message.
 	-n	Phone number.
-	-m	Message.
+	-m	Message. Will copy from the host clipboard if unspecified.
 EOF
 }
 
