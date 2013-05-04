@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+
+# Sync /etc/hosts to the Android emulator.
+# Requires Bash 4.
+# Copyright (c) 2013, Matthew Caruana Galizia <m@m.cg>
+# License: MIT <http://mattcg.mit-license.org/>
+
+# Set the prompt for the select command.
+PS3="Type a number or 'q' to quit: "
+
+# Check the visual editor.
+if [[ -z "$VISUAL" ]]; then
+	editor=vi
+else
+	editor=$VISUAL
+fi
+
+# Declare an associative array of hosts.
+declare -A hosts
+
+# Read host file entries into the array using process substitution.
+# Does the inverse operation if $2 = "remove".
+# Ref: http://stackoverflow.com/a/9985310/821334
+store_hosts ( ) {
+	while read address name; do
+		if [[ $2 == "remove" ]]; then
+			remove_host $name
+		else
+
+			# Android uses a special address for the host loopback.
+			if [[ $address == "127.0.0.1" ]]; then
+				hosts[$name]="10.0.2.2"
+			else
+				hosts[$name]="$address"
+			fi
+		fi
+	done < <(cat $1 | grep -v '^#' | grep -v '^$' | egrep -v '(broadcast|local)host\s*$')
+}
+
+# Remove a host from the array if set.
+remove_host ( ) {
+	if [[ ! -z "${hosts[$1]}" ]]; then
+		unset hosts[$1]
+	fi
+}
+
+# Append to hosts file.
+write_hosts ( ) {
+	for name in "${!hosts[@]}"; do
+		echo "${hosts["$name"]} $name" >> $1
+	done
+}
+
+# Debug output.
+output_hosts ( ) {
+	for name in "${!hosts[@]}"; do
+		echo "$name - ${hosts["$name"]}"
+	done
+}
+
+store_hosts "/etc/hosts"
+
+# Create a list of virtual device names to display.
+avdList=$(android list avd -c)
+ 
+# Show a menu and ask for input.
+select avdName in $avdList; do
+	if [ -n "$avdName" ]; then
+		echo "Loading ${avdName} in emulator..."
+		emulator "$@" -partition-size 512 -avd "${avdName}" &> /dev/null &
+		echo "Waiting for remount..."
+		sleep 3
+		until [[ "${output}" == "remount succeeded" ]]; do
+			output=$(adb remount 2> /dev/null)
+			sleep 1
+		done
+		tmpFile=/tmp/android-hosts.$$.txt
+		adb pull /system/etc/hosts $tmpFile
+		store_hosts $tmpFile "remove"
+		write_hosts $tmpFile
+		$editor $tmpFile
+		adb push $tmpFile /system/etc/hosts
+		rm $tmpFile
+	fi
+	break
+done
