@@ -15,28 +15,35 @@ aemu-hosts [options]
 
 OPTIONS:
 	-h	Show this message.
+	-e	Edit hosts before transferring.
+	-a	The AVD name (will show a list for selection if unspecified).
 EOF
 }
 
-while getopts "hn:m:" OPTION
+# Whether to open the hosts file for editing before syncing.
+edit=false
+
+# The selected AVD name.
+avd=""
+
+while getopts "hea:" OPTION
 do
 	case $OPTION in
 		h)
 			usage
 			exit 1
 			;;
+		e)
+			edit=true
+			;;
+		a)
+			avd=$OPTARG
+			;;
 	esac
 done
 
 # Set the prompt for the select command.
 PS3="Type a number or 'q' to quit: "
-
-# Check the visual editor.
-if [[ -z "$VISUAL" ]]; then
-	editor=vi
-else
-	editor=$VISUAL
-fi
 
 # Declare an associative array of hosts.
 declare -A hosts
@@ -81,29 +88,58 @@ output_hosts ( ) {
 	done
 }
 
+select_avd ( ) {
+
+	# Create a list of virtual device names to display.
+	list=$(android list avd -c)
+
+	# Show a menu and ask for input.
+	select name in $list; do
+		if [ -n "$name" ]; then
+			avd=$name
+		else
+			exit 1
+		fi
+		break
+	done
+}
+
+edit_file ( ) {
+
+	# Check the visual editor.
+	if [ -z "$VISUAL" ]; then
+		editor=vi
+	else
+		editor=$VISUAL
+	fi
+
+	$editor $1
+}
+
 store_hosts "/etc/hosts"
 
-# Create a list of virtual device names to display.
-avdList=$(android list avd -c)
- 
-# Show a menu and ask for input.
-select avdName in $avdList; do
-	if [ -n "$avdName" ]; then
-		echo "Loading ${avdName} in emulator..."
-		emulator "$@" -partition-size 512 -avd "${avdName}" &> /dev/null &
-		echo "Waiting for remount..."
-		sleep 3
-		until [[ "${output}" == "remount succeeded" ]]; do
-			output=$(adb remount 2> /dev/null)
-			sleep 1
-		done
-		tmpFile=/tmp/android-hosts.$$.txt
-		adb pull /system/etc/hosts $tmpFile
-		store_hosts $tmpFile "remove"
-		write_hosts $tmpFile
-		$editor $tmpFile
-		adb push $tmpFile /system/etc/hosts
-		rm $tmpFile
-	fi
-	break
+if [ -z $avd ]; then
+	select_avd
+fi
+
+echo "Loading ${avd} in emulator..."
+emulator -partition-size 512 -avd "${avd}" &> /dev/null &
+
+echo "Waiting for remount..."
+sleep 3
+until [[ "${output}" == "remount succeeded" ]]; do
+	output=$(adb remount 2> /dev/null)
+	sleep 1
 done
+
+tmpfile=/tmp/android-hosts.$$.txt
+adb pull /system/etc/hosts $tmpfile
+store_hosts $tmpfile "remove"
+write_hosts $tmpfile
+
+if $edit; then
+	edit_file $tmpfile
+fi
+
+adb push $tmpfile /system/etc/hosts
+rm $tmpfile
