@@ -1,12 +1,16 @@
-# Android emulator hosts file syncing #
+# Android emulator tools #
+
+Scripts added as I go along.
+
+## aemu-hosts ##
 
 Syncs your `/etc/hosts` with your Android virtual devices.
 
-## Why is this needed? ##
+### Why is this needed? ###
 
 Unlike the iOS simulator, the Android emulator ignores your system's hosts file.
 
-## Install ##
+### Usage ###
 
 You'll need Bash 4. OS X < 10.8 comes with Bash 3, so you'll need to [upgrade](http://apple.stackexchange.com/a/24635/28699).
 
