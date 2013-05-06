@@ -26,6 +26,22 @@ With `-e`, your `$VISUAL` editor should open the hosts file for last minute edit
 
 Save the file and exit to push the changes.
 
+## aemu-sms ##
+
+Send an SMS directly to the running virtual device.
+
+### Why is this needed? ###
+
+Using the shell is annoying.
+
+### Usage ###
+
+```bash
+./aemu-sms -h
+```
+
+Use `-m` to specify the message and the optional `-n` for the phone number.
+
 ## License ##
 
 Copyright © 2013 Matthew Caruana Galizia, licensed under an [MIT license](http://mattcg.mit-license.org/).
