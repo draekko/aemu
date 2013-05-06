@@ -42,6 +42,14 @@ Using the shell is annoying.
 
 Use `-m` to specify the message and the optional `-n` for the phone number.
 
+If you don't specify a message, the contents of your clipboard will be used. This is a useful workaround for pasting into the emulator.
+
+You can also pipe in the SMS text:
+
+```bash
+echo 'Wake up, sheeple!' | ./aemu-sms
+```
+
 ## License ##
 
 Copyright © 2013 Matthew Caruana Galizia, licensed under an [MIT license](http://mattcg.mit-license.org/).

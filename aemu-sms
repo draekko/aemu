@@ -37,16 +37,29 @@ do
 			;;
 	esac
 done
- 
+
 if [ -z "$TEXT" ]; then
-	TEXT=`./pbpaste`
+	# Check that text is coming from a pipe.
+	# http://serverfault.com/a/156510/100761
+	if [[ $# -lt 1 && -p /dev/stdin ]]; then
+		# Read from pipe.
+		IFS=$'\n' read -d '' -r -a lines
+		for line in "${lines[@]}"; do
+			TEXT="$TEXT\n$line"
+		done
+	fi
+
 	if [ -z "$TEXT" ]; then
-		TEXT=$DEFAULTTEXT
+		# Read from the clipboard.
+		TEXT=`./pbpaste`
+		if [ -z "$TEXT" ]; then
+			TEXT=$DEFAULTTEXT
+		fi
 	fi
 fi
 
 if [ -z "$NUMBER" ]; then
 	NUMBER=$DEFAULTNUMBER
 fi
- 
+
 ( echo sms send $NUMBER $TEXT; sleep 1; ) | telnet localhost 5554 &> /dev/null
