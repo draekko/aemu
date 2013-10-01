@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+
+# Install Android Chromium on running Android virtual devices.
+# Modified from a version originally written by Paul Kinlan.
+# http://paul.kinlan.me/installing-chrome-for-android-on-an-emulator/
+# Copyright (c) 2013, Paul Kinlan
+# Copyright (c) 2013, Matthew Caruana Galizia <m@m.cg>
+# License: MIT <http://mattcg.mit-license.org/>
+
+usage() {
+cat << EOF
+Install Chromium on running Android virtual devices.
+
+USAGE:
+
+aemu-chromium [options]
+
+OPTIONS:
+	-h	Show this message.
+	-r	Specify a revision, otherwise the latest will be used.
+EOF
+}
+
+while getopts "hr:" OPTION
+do
+	case $OPTION in
+		h)
+			usage
+			exit 1
+			;;
+		e)
+			revision=$OPTARG
+			;;
+	esac
+done
+
+if [ -z $revision ]; then
+	revision=$(curl -s http://commondatastorage.googleapis.com/chromium-browser-continuous/Android/LAST_CHANGE)
+fi
+
+archive=tmp/chrome-android-$revision.zip
+apk=tmp/chrome-android-$revision.apk
+
+echo "Installing Chromium Android at $revision."
+
+if [ ! -d tmp ]; then
+	mkdir tmp
+fi
+
+if [ ! -f $apk ]; then
+	curl http://commondatastorage.googleapis.com/chromium-browser-continuous/Android/$revision/chrome-android.zip \
+		--output $archive \
+		--progress
+	unzip -p $archive chrome-android/apks/ChromiumTestShell.apk > $apk
+	rm $archive
+fi
+
+adb install $apk
